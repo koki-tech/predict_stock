@@ -7,7 +7,7 @@ from keras.layers import Dense, Activation, Dropout
 
 # CSVデータの読み込み
 csv_list = ["TimeChart_cyber.csv", "TimeChart_JT.csv", "TimeChart_kose.csv"] # CSVファイルのリスト
-data = pd.read_csv('csv/' + csv_list[0], encoding="UTF-8", index_col="日付", parse_dates=True)  # CSVファイルの読み込み
+data = pd.read_csv('csv/' + csv_list[2], encoding="UTF-8", index_col="日付", parse_dates=True)  # CSVファイルの読み込み
 
 # データの整形
 data = data.sort_values("日付") # 昔のデータから順番にsort
@@ -97,3 +97,22 @@ for i in range(4):
     X.append(y_predict_small[0][0])
     X = pd.Series(X)
     print("{}週間後: {}".format(i+1, predict_list[i][0][0]))
+
+latest_price = X[-5::].values[0] * max_num
+rate_list = [""]
+x = ["latest", "a week later", "2 weeks later", "3 weeks later", "4 weeks later"]
+y = [latest_price]
+for j in range(4):
+    rate = (predict_list[j][0][0] - latest_price) / latest_price
+    rate_round = round(rate * 100, 1)
+    rate_list.append("(" + str(rate_round) + "%)")
+    y.append(predict_list[j][0][0])
+    
+plt.figure(figsize=(10, 6), dpi=100)
+plt.title("Stock Price Prediction Graph")
+plt.ylabel("yen")
+plt.plot(x, y, marker="D", markersize=5, markeredgewidth=3, markeredgecolor="blue", markerfacecolor="lightblue")
+for (i, j, k) in zip(x, y, rate_list):
+    detail_msg = str(int(round(j))) + "yen" + k
+    plt.annotate(detail_msg, xy = (i, j+7.5), size = 10, color = "red")
+plt.show()
